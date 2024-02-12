@@ -1,0 +1,99 @@
+{
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  // generic app workspace area
+  "workspaceMount": "source=${localWorkspaceFolder},target=/src/app,type=bind,consistency=cached",
+  "workspaceFolder": "/src/app",
+  "mounts": [
+    "source=${localWorkspaceFolder}/.home/.jupyter,target=/home/jovyan/.jupyter,type=bind,consistency=cached",
+    "source=${localWorkspaceFolder}/.home/.ipython,target=/home/jovyan/.ipython,type=bind,consistency=cached",
+  ],
+  "forwardPorts": [
+    //jupyter output
+    8888
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // remote containers
+        "ms-azuretools.vscode-docker",
+        // ms python tools
+        "ms-python.python",
+        "ms-python.pylint",
+        "ms-python.black-formatter",
+        "ms-python.isort",
+        "ms-toolsai.jupyter",
+        // others
+        "streetsidesoftware.code-spell-checker",
+        "DavidAnson.vscode-markdownlint",
+        "eamodio.gitlens",
+        "xelad0m.jupyter-toc",
+      ],
+      "settings": {
+        // python paths
+        "python.defaultInterpreterPath": "/opt/conda/envs/app/bin/python",
+        // tests
+        "python.testing.pytestEnabled": true,
+        "python.testing.pytestArgs": [
+          "tests"
+        ],
+        // formatting
+        "python.formatting.provider": "none",
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+          },
+        },
+        // pylint
+        "pylint.args": [
+          "--disable=wrong-import-order,missing-docstring,unused-import,unused-wildcard-import,wildcard-import,unnecessary-dunder-call,unused-argument,logging-fstring-interpolation,f-string-without-interpolation,no-else-return,multiple-statements",
+          "--good-names-rgxs=^[_a-z][_a-z0-9]?$" // single or double variable names are okay
+        ],
+        // black
+        "black-formatter.args": [
+          "--line-length",
+          "100"
+        ],
+        // isort
+        "isort.args": [
+          "--profile",
+          "black",
+          "--combine-as"
+        ],
+        "tasks": {
+          // See https://go.microsoft.com/fwlink/?LinkId=733558
+          // for the documentation about the tasks.json format
+          "version": "2.0.0",
+          "presentation": {
+            "echo": true,
+            "reveal": "always",
+            "focus": false,
+            "panel": "dedicated",
+            "showReuseMessage": false,
+            "clear": true
+          },
+          "tasks": [
+            {
+              "label": "jupyter",
+              "type": "shell",
+              "isBackground": true,
+              "problemMatcher": [],
+              "command": "start-notebook.sh --ServerApp.password='' --ServerApp.token=''"
+            },
+            {
+              "label": "pytest",
+              "type": "shell",
+              "isBackground": false,
+              "problemMatcher": [],
+              "command": "/opt/conda/envs/app/bin/python -m pytest --rootdir /src/app ./tests"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
